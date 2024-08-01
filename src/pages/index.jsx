@@ -84,36 +84,6 @@ const Home = ({ initialData }) => {
       const data = response.data;
       dispatch(setUserData(data));
 
-      if (data.profilePicture) {
-        const imageResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${data.profilePicture}`,
-          {
-            headers: {
-              "x-frontend-id": "orionship",
-            },
-            responseType: "blob",
-          }
-        );
-        const imageUrlObject = URL.createObjectURL(imageResponse.data);
-        setProfilePictureURL(imageUrlObject);
-      }
-
-      if (data.contactMePicture) {
-        const contactImageResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${data.contactMePicture}`,
-          {
-            headers: {
-              "x-frontend-id": "orionship",
-            },
-            responseType: "blob",
-          }
-        );
-        const contactImageUrlObject = URL.createObjectURL(
-          contactImageResponse.data
-        );
-        setContactMePictureURL(contactImageUrlObject);
-      }
-
       await dispatch(fetchListings());
       await dispatch(getAllReviews());
       await dispatch(getFeaturedStarCount());
@@ -136,6 +106,8 @@ const Home = ({ initialData }) => {
     profileBio,
     profileDescription,
     strategy,
+    profilePicture,
+    contactMePicture
   } = userData;
 
   if (loading) {
@@ -177,7 +149,7 @@ const Home = ({ initialData }) => {
           >
             <div className="relative bg-white">
               <Image
-                src={profilePictureURL}
+                src={profilePicture}
                 alt="Profile Picture"
                 width={300}
                 height={300}
@@ -225,14 +197,14 @@ const Home = ({ initialData }) => {
         </motion.div>
       </div>
       <Intro
-        profilePicture={profilePictureURL}
+        profilePicture={profilePicture}
         profileBio={profileBio}
         profileDescription={profileDescription}
       />
       <Reviews />
       <Listing listings={listings} />
       <SoldListing />
-      <Strategy strategy={strategy} contactMePictureURL={contactMePictureURL} />
+      <Strategy strategy={strategy} contactMePictureURL={contactMePicture} />
       <Blog />
       <Footer />
     </div>

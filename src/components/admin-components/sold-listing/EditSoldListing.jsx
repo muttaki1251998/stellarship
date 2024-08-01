@@ -79,37 +79,12 @@ const EditSoldList = ({ soldListing, isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState(soldListing);
   const [newImages, setNewImages] = useState([]);
   const [isChanged, setIsChanged] = useState(false);
-  const [imageURLs, setImageURLs] = useState([]);
 
   useEffect(() => {
     setFormData(soldListing);
     setNewImages([]);
     setIsChanged(false);
-    fetchImages(soldListing.soldListingImages);
   }, [soldListing]);
-
-  const fetchImages = async (images) => {
-    const imagePromises = images.map(async (image) => {
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/uploads/orionship/${image.split('/').pop()}`,
-          {
-            headers: {
-              "x-frontend-id": "orionship",
-            },
-            responseType: "blob",
-          }
-        );
-        return URL.createObjectURL(response.data);
-      } catch (error) {
-        console.error("Error fetching image:", error);
-        return null;
-      }
-    });
-
-    const imageURLs = await Promise.all(imagePromises);
-    setImageURLs(imageURLs.filter((url) => url !== null));
-  };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -131,10 +106,9 @@ const EditSoldList = ({ soldListing, isOpen, onClose, onSave }) => {
   };
 
   const handleDeleteImage = async (image, index) => {
-    const imageName = image.split("/").pop(); // Extract only the image file name
     try {
       const response = await axios.delete(
-        `${process.env.NEXT_BACKEND_API_URL}/delete-soldListing-image/${soldListing._id}/${imageName}`,
+        `${process.env.NEXT_BACKEND_API_URL}/delete-soldListing-image/${soldListing._id}/${encodeURIComponent(image)}`,
         {
           headers: {
             "x-frontend-id": "orionship",
@@ -148,9 +122,6 @@ const EditSoldList = ({ soldListing, isOpen, onClose, onSave }) => {
             (img) => img !== image
           ),
         }));
-        setImageURLs((prevState) =>
-          prevState.filter((_, imgIndex) => imgIndex !== index)
-        );
         setIsChanged(true);
       }
     } catch (error) {
@@ -356,7 +327,7 @@ const EditSoldList = ({ soldListing, isOpen, onClose, onSave }) => {
               className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
             />
             <div className="grid grid-cols-3 gap-4 mt-4">
-              {imageURLs.map((url, index) => (
+              {formData.soldListingImages.map((url, index) => (
                 <div key={index} className="relative">
                   <img
                     src={url}
@@ -366,7 +337,7 @@ const EditSoldList = ({ soldListing, isOpen, onClose, onSave }) => {
                   <button
                     type="button"
                     className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
-                    onClick={() => handleDeleteImage(formData.soldListingImages[index], index)}
+                    onClick={() => handleDeleteImage(url, index)}
                   >
                     &times;
                   </button>

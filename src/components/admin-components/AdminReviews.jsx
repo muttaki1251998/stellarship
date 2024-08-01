@@ -16,7 +16,6 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { TrashIcon, StarIcon } from "@heroicons/react/solid";
-import axios from 'axios';
 
 const AdminReviews = () => {
   const dispatch = useDispatch();
@@ -32,41 +31,10 @@ const AdminReviews = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedReview, setSelectedReview] = useState(null);
   const [errorModalOpen, setErrorModalOpen] = useState(false);
-  const [imageURLs, setImageURLs] = useState({});
 
   useEffect(() => {
     dispatch(getAllReviews());
   }, [dispatch]);
-
-  useEffect(() => {
-    if (reviews.length > 0) {
-      fetchImages();
-    }
-  }, [reviews]);
-
-  const fetchImages = () => {
-    reviews.forEach((review, idx) => {
-      fetchImage(review.picture, idx);
-    });
-  };
-
-  const fetchImage = async (imagePath, idx) => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`, {
-        responseType: 'blob',
-        headers: {
-          "x-frontend-id": "orionship",
-        }
-      });
-      const imageUrl = URL.createObjectURL(response.data);
-      setImageURLs((prevState) => ({
-        ...prevState,
-        [idx]: imageUrl,
-      }));
-    } catch (error) {
-      console.error("Error fetching image:", error);
-    }
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -124,9 +92,7 @@ const AdminReviews = () => {
   };
 
   const handleStarClick = (review) => {
-    const starredCount = reviews.filter(
-      (r) => r.featureWithStars
-    ).length;
+    const starredCount = reviews.filter((r) => r.featureWithStars).length;
 
     if (!review.featureWithStars && starredCount >= 3) {
       setErrorMessage(
@@ -253,7 +219,8 @@ const AdminReviews = () => {
         </div>
       </form>
       <h2 className="text-center text-2xl text-black mt-4 mb-4">
-        You can only have 3 reviews with a star! Click on the star icon to enable or disable star status. 
+        You can only have 3 reviews with a star! Click on the star icon to
+        enable or disable star status.
       </h2>
       {reviews.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
@@ -284,7 +251,7 @@ const AdminReviews = () => {
               <div className="relative h-full">
                 <img
                   className="w-full h-full object-cover"
-                  src={imageURLs[index] || ""}
+                  src={review.picture || ""}
                   alt={review.name}
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-40 p-4 flex flex-col justify-between">
@@ -326,7 +293,7 @@ const AdminReviews = () => {
                 <ModalBody>
                   <img
                     className="w-full h-64 object-cover rounded"
-                    src={imageURLs[reviews.indexOf(selectedReview)] || ""}
+                    src={selectedReview.picture || ""}
                     alt={selectedReview.name}
                   />
                   <p className="mt-4 text-gray-700">{selectedReview.quote}</p>

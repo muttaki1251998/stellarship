@@ -14,7 +14,7 @@ const AdminBlog = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [header, setHeader] = useState("");
   const [content, setContent] = useState("");
-  const [showChatGPTButton, setShowChatGPTButton] = useState(true); // Kept true as per your previous instruction
+  const [showChatGPTButton, setShowChatGPTButton] = useState(true);
   const [editingBlogId, setEditingBlogId] = useState(null);
   const [headerError, setHeaderError] = useState(false);
   const fileInputRef = useRef(null);
@@ -22,41 +22,10 @@ const AdminBlog = () => {
 
   const dispatch = useDispatch();
   const blogs = useSelector((state) => state.blog.blogs);
-  const [imageURLs, setImageURLs] = useState({});
 
   useEffect(() => {
     dispatch(getAllBlogs());
   }, [dispatch]);
-
-  useEffect(() => {
-    if (blogs.length > 0) {
-      fetchImages();
-    }
-  }, [blogs]);
-
-  const fetchImages = () => {
-    blogs.forEach((blog, idx) => {
-      fetchImage(blog.picture, idx);
-    });
-  };
-
-  const fetchImage = async (imagePath, idx) => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`, {
-        responseType: 'blob',
-        headers: {
-          "x-frontend-id": "orionship",
-        }
-      });
-      const imageUrl = URL.createObjectURL(response.data);
-      setImageURLs((prevState) => ({
-        ...prevState,
-        [idx]: imageUrl,
-      }));
-    } catch (error) {
-      console.error("Error fetching image:", error);
-    }
-  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -259,9 +228,9 @@ const AdminBlog = () => {
               key={blog._id}
               className="bg-white p-4 rounded-lg shadow-md mb-8 w-full"
             >
-              {imageURLs[idx] && (
+              {blog.picture && (
                 <img
-                  src={imageURLs[idx]}
+                  src={blog.picture}
                   alt="Blog"
                   className="w-full h-64 object-cover rounded-lg mb-2"
                 />

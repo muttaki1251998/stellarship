@@ -29,25 +29,6 @@ const ContactPage = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [imageURL, setImageURL] = useState(null);
 
-  useEffect(() => {
-    if (contactMePicture) {
-      const fetchImage = async () => {
-        try {
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${contactMePicture}`, {
-            responseType: 'blob',
-            headers: {
-              "x-frontend-id": "orionship",
-            }
-          });
-          const imageUrl = URL.createObjectURL(response.data);
-          setImageURL(imageUrl);
-        } catch (error) {
-          console.error("Error fetching image:", error);
-        }
-      };
-      fetchImage();
-    }
-  }, [contactMePicture]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -116,7 +97,7 @@ const ContactPage = () => {
                 />
               ) : (
                 <img
-                  src="/images/buying.jpg"
+                  src={contactMePicture}
                   alt={`${firstName} ${lastName}`}
                   className="w-full h-full object-contain"
                 />

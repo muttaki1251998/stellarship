@@ -1,50 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { getAllBlogs } from "@/store/blogSlice";
 import { Image } from "@nextui-org/react";
 import Link from "next/link";
 import Footer from "../../components/Footer";
-import axios from "axios";
 
 const AllBlogs = () => {
   const dispatch = useDispatch();
   const blogs = useSelector((state) => state.blog.blogs);
-  const [imageURLs, setImageURLs] = useState({});
 
   useEffect(() => {
     dispatch(getAllBlogs());
   }, [dispatch]);
-
-  useEffect(() => {
-    if (blogs.length > 0) {
-      fetchImages();
-    }
-  }, [blogs]);
-
-  const fetchImages = () => {
-    blogs.forEach((blog, idx) => {
-      fetchImage(blog.picture, idx);
-    });
-  };
-
-  const fetchImage = async (imagePath, idx) => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`, {
-        responseType: 'blob',
-        headers: {
-          "x-frontend-id": "orionship",
-        }
-      });
-      const imageUrl = URL.createObjectURL(response.data);
-      setImageURLs((prevState) => ({
-        ...prevState,
-        [idx]: imageUrl,
-      }));
-    } catch (error) {
-      console.error("Error fetching image:", error);
-    }
-  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -71,16 +39,16 @@ const AllBlogs = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: blogIndex * 0.2 }}
-                className="w-full max-w-lg h-128 bg-[#2a3c3a] shadow dark:bg-gray-800 dark:border-gray-700 overflow-hidden group"
+                className="w-full max-w-lg h-128 bg-[#5B6C82] shadow dark:bg-gray-800 dark:border-gray-700 overflow-hidden group"
               >
                 <Link href={`/blog/${blog._id}`} legacyBehavior>
                   <a>
-                    {imageURLs[blogIndex] && (
+                    {blog.picture && (
                       <div className="h-64 w-full overflow-hidden">
                         <Image
                           alt="Blog Image"
                           className="object-cover w-full h-full transform transition-transform duration-500 group-hover:scale-110"
-                          src={imageURLs[blogIndex]}
+                          src={blog.picture}
                           style={{ borderRadius: 0 }} // Ensure the image is not rounded
                         />
                       </div>

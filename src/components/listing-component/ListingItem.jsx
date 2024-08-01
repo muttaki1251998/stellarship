@@ -1,35 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import BedSingleIcon from "../IconComponents/BedSingleIcon";
 import BathIcon from "../IconComponents/BathIcon";
 import Link from "next/link";
-import axios from "axios";
 
 const ListingItem = ({ listing, formatPrice, isSoldListing }) => {
-  const [imageURL, setImageURL] = useState(null);
   const listingType = isSoldListing ? 'sold' : 'listing';
-
-  useEffect(() => {
-    const fetchImage = async (imagePath) => {
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`, {
-          responseType: 'blob',
-          headers: {
-            "x-frontend-id": "orionship",
-          }
-        });
-        const imageUrl = URL.createObjectURL(response.data);
-        setImageURL(imageUrl);
-      } catch (error) {
-        console.error("Error fetching image:", error);
-      }
-    };
-
-    if (listing.listingImages && listing.listingImages.length > 0) {
-      fetchImage(listing.listingImages[0]);
-    } else if (listing.soldListingImages && listing.soldListingImages.length > 0) {
-      fetchImage(listing.soldListingImages[0]);
-    }
-  }, [listing]);
+  const images = isSoldListing ? listing.soldListingImages : listing.listingImages;
 
   return (
     <Link legacyBehavior href={`/listing/${listing._id}?type=${listingType}`}>
@@ -41,9 +17,9 @@ const ListingItem = ({ listing, formatPrice, isSoldListing }) => {
             </div>
           )}
           <div className="relative">
-            {imageURL ? (
+            {images && images.length > 0 ? (
               <img
-                src={imageURL}
+                src={images[0]}
                 alt={`Listing Image`}
                 className="w-full h-80 transition-transform duration-500 group-hover:scale-105"
               />

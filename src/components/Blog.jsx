@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllBlogs } from "@/store/blogSlice";
 import { Image } from "@nextui-org/react";
@@ -6,46 +6,14 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import Link from "next/link";
 import CustomButton from "./CustomButton";
-import axios from "axios";
 
 const Blog = () => {
   const dispatch = useDispatch();
   const blogs = useSelector((state) => state.blog.blogs);
-  const [imageURLs, setImageURLs] = useState({});
 
   useEffect(() => {
     dispatch(getAllBlogs());
   }, [dispatch]);
-
-  useEffect(() => {
-    if (blogs.length > 0) {
-      fetchImages();
-    }
-  }, [blogs]);
-
-  const fetchImages = () => {
-    blogs.forEach((blog, idx) => {
-      fetchImage(blog.picture, idx);
-    });
-  };
-
-  const fetchImage = async (imagePath, idx) => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`, {
-        responseType: 'blob',
-        headers: {
-          "x-frontend-id": "orionship",
-        }
-      });
-      const imageUrl = URL.createObjectURL(response.data);
-      setImageURLs((prevState) => ({
-        ...prevState,
-        [idx]: imageUrl,
-      }));
-    } catch (error) {
-      console.error("Error fetching image:", error);
-    }
-  };
 
   const featuredBlogs = blogs.slice(0, 2);
 
@@ -85,12 +53,12 @@ const Blog = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: blogIndex * 0.2 }}
                 >
-                  {imageURLs[blogIndex] && (
+                  {blog.picture && (
                     <div className="h-64 w-full overflow-hidden">
                       <Image
                         alt="Blog Image"
                         className="object-cover w-full h-full transform transition-transform duration-500 group-hover:scale-110"
-                        src={imageURLs[blogIndex]}
+                        src={blog.picture}
                         style={{ borderRadius: 0 }} // Ensure the image is not rounded
                       />
                     </div>

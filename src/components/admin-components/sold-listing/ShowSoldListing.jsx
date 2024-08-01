@@ -6,7 +6,6 @@ import axios from 'axios';
 
 const ShowSoldListing = ({ soldListings }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState({});
-  const [imageURLs, setImageURLs] = useState({});
   const [editingSoldListing, setEditingSoldListing] = useState(null);
   const dispatch = useDispatch();
 
@@ -19,39 +18,13 @@ const ShowSoldListing = ({ soldListings }) => {
       {}
     );
     setCurrentImageIndex(initialImageIndex);
-
-    // Fetch images
-    soldListings.forEach((soldListing, index) => {
-      if (soldListing.soldListingImages && soldListing.soldListingImages.length > 0) {
-        fetchImage(soldListing.soldListingImages[0], index);
-      }
-    });
   }, [soldListings]);
-
-  const fetchImage = async (imagePath, index) => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`, {
-        headers: {
-          "x-frontend-id": "orionship",
-        },
-        responseType: 'blob',
-      });
-      const imageUrlObject = URL.createObjectURL(response.data);
-      setImageURLs((prevState) => ({
-        ...prevState,
-        [index]: imageUrlObject,
-      }));
-    } catch (error) {
-      console.error("Error fetching image:", error);
-    }
-  };
 
   const handleNextImage = (index) => {
     setCurrentImageIndex((prevState) => ({
       ...prevState,
       [index]: (prevState[index] + 1) % soldListings[index].soldListingImages.length,
     }));
-    fetchImage(soldListings[index].soldListingImages[(currentImageIndex[index] + 1) % soldListings[index].soldListingImages.length], index);
   };
 
   const handlePrevImage = (index) => {
@@ -59,7 +32,6 @@ const ShowSoldListing = ({ soldListings }) => {
       ...prevState,
       [index]: (prevState[index] - 1 + soldListings[index].soldListingImages.length) % soldListings[index].soldListingImages.length,
     }));
-    fetchImage(soldListings[index].soldListingImages[(currentImageIndex[index] - 1 + soldListings[index].soldListingImages.length) % soldListings[index].soldListingImages.length], index);
   };
 
   const handleDelete = async (id) => {
@@ -102,7 +74,7 @@ const ShowSoldListing = ({ soldListings }) => {
             {soldListing.soldListingImages && soldListing.soldListingImages.length > 0 ? (
               <>
                 <img
-                  src={imageURLs[index] || ''}
+                  src={soldListing.soldListingImages[currentImageIndex[index]] || ''}
                   alt={`Sold Listing Image ${index + 1}`}
                   className="w-full h-auto rounded-md mb-4"
                 />

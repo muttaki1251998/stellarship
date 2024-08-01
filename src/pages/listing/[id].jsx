@@ -12,7 +12,8 @@ const ListingDetails = ({ listing, isSoldListing }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [coordinates, setCoordinates] = useState({ lat: null, lng: null });
   const [geocodeError, setGeocodeError] = useState(null);
-  const [imageURLs, setImageURLs] = useState([]);
+
+  const images = listing.listingImages || listing.soldListingImages || [];
 
   useEffect(() => {
     const fetchCoordinates = async () => {
@@ -43,47 +44,15 @@ const ListingDetails = ({ listing, isSoldListing }) => {
     }
   }, [listing]);
 
-  useEffect(() => {
-    const fetchImages = () => {
-      const images = listing.listingImages || listing.soldListingImages || [];
-      images.forEach((imagePath, idx) => {
-        fetchImage(imagePath, idx);
-      });
-    };
-
-    const fetchImage = async (imagePath, idx) => {
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`, {
-          responseType: 'blob',
-          headers: {
-            "x-frontend-id": "orionship",
-          }
-        });
-        const imageUrl = URL.createObjectURL(response.data);
-        setImageURLs((prevState) => {
-          const newImageURLs = [...prevState];
-          newImageURLs[idx] = imageUrl;
-          return newImageURLs;
-        });
-      } catch (error) {
-        console.error("Error fetching image:", error);
-      }
-    };
-
-    if (listing) {
-      fetchImages();
-    }
-  }, [listing]);
-
   if (!listing) return <div>Loading...</div>;
 
   const handleNextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % imageURLs.length);
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
 
   const handlePrevImage = () => {
     setCurrentImageIndex(
-      (prevIndex) => (prevIndex - 1 + imageURLs.length) % imageURLs.length
+      (prevIndex) => (prevIndex - 1 + images.length) % images.length
     );
   };
 
@@ -100,7 +69,7 @@ const ListingDetails = ({ listing, isSoldListing }) => {
           <div className="relative w-full max-w-4xl">
             <div className="relative w-full h-96">
               <AnimatePresence initial={false}>
-                {imageURLs.map(
+                {images.map(
                   (image, index) =>
                     index === currentImageIndex && (
                       <motion.div
@@ -162,7 +131,7 @@ const ListingDetails = ({ listing, isSoldListing }) => {
               </button>
             </div>
             <div className="flex justify-center mt-4 space-x-2">
-              {imageURLs.map((image, index) => (
+              {images.map((image, index) => (
                 <div
                   key={index}
                   className={`relative w-20 h-20 cursor-pointer border-2 ${

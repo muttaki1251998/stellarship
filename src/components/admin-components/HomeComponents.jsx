@@ -91,27 +91,12 @@ const HomeComponents = () => {
   useEffect(() => {
     setHomeData(userData);
     if (userData.profilePicture) {
-      fetchImage(userData.profilePicture, setProfilePicturePreview);
+      setProfilePicturePreview(userData.profilePicture);
     }
     if (userData.contactMePicture) {
-      fetchImage(userData.contactMePicture, setContactMePicturePreview);
+      setContactMePicturePreview(userData.contactMePicture);
     }
   }, [userData]);
-
-  const fetchImage = async (imagePath, setPreview) => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`, {
-        responseType: 'blob',
-        headers: {
-          "x-frontend-id": "orionship",
-        }
-      });
-      const imageUrl = URL.createObjectURL(response.data);
-      setPreview(imageUrl);
-    } catch (error) {
-      console.error("Error fetching image:", error);
-    }
-  };
 
   return (
     <>

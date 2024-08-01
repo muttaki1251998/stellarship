@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { getAllBlogs } from "@/store/blogSlice";
@@ -11,7 +11,6 @@ const BlogPost = ({ initialBlog }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { id } = router.query;
-  const [imageURL, setImageURL] = useState(null);
 
   // Fetch blogs from Redux store (if updated on the client side)
   const blogs = useSelector((state) => state.blog.blogs);
@@ -22,31 +21,6 @@ const BlogPost = ({ initialBlog }) => {
     }
   }, [dispatch, id]);
 
-  useEffect(() => {
-    const blog = blogs.find((b) => b._id === id) || initialBlog;
-    if (blog && blog.picture) {
-      fetchImage(blog.picture);
-    }
-  }, [blogs, initialBlog, id]);
-
-  const fetchImage = async (imagePath) => {
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`,
-        {
-          responseType: "blob",
-          headers: {
-            "x-frontend-id": "orionship",
-          },
-        }
-      );
-      const imageUrl = URL.createObjectURL(response.data);
-      setImageURL(imageUrl);
-    } catch (error) {
-      console.error("Error fetching image:", error);
-    }
-  };
-
   // Find blog in Redux store, fallback to initialBlog if not found
   const blog = blogs.find((b) => b._id === id) || initialBlog;
 
@@ -56,7 +30,7 @@ const BlogPost = ({ initialBlog }) => {
 
   return (
     <div className="relative w-full min-h-screen bg-[#ffffff] flex flex-col items-center pt-24">
-      {imageURL && (
+      {blog.picture && (
         <motion.div
           className="container mt-32 flex flex-col items-center w-full max-w-5xl px-4 space-y-8 text-black"
           initial={{ opacity: 0, scale: 0.2 }}
@@ -65,7 +39,7 @@ const BlogPost = ({ initialBlog }) => {
         >
           <Image
             alt="Blog Image"
-            src={imageURL}
+            src={blog.picture}
             layout="fill"
             objectFit="cover"
             className="object-cover w-full h-full"
@@ -95,6 +69,7 @@ const BlogPost = ({ initialBlog }) => {
           ))}
         </motion.div>
       </div>
+      <Footer />
     </div>
   );
 };

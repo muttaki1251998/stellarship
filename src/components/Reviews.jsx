@@ -11,7 +11,6 @@ import {
   ModalTrigger,
 } from "@/components/motion-components/CustomModal";
 import { cn } from "@/lib/utils";
-import axios from "axios";
 
 const Reviews = ({
   direction = "left",
@@ -23,36 +22,10 @@ const Reviews = ({
   const scrollerRef = useRef(null);
   const [selectedReview, setSelectedReview] = useState(null);
   const items = useSelector((state) => state.reviews.reviews);
-  const [imageURLs, setImageURLs] = useState({});
 
   useEffect(() => {
     addAnimation();
-    fetchImages();
   }, [items]);
-
-  const fetchImages = () => {
-    items.forEach((item, idx) => {
-      fetchImage(item.picture, idx);
-    });
-  };
-
-  const fetchImage = async (imagePath, idx) => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`, {
-        responseType: 'blob',
-        headers: {
-          "x-frontend-id": "orionship",
-        }
-      });
-      const imageUrl = URL.createObjectURL(response.data);
-      setImageURLs((prevState) => ({
-        ...prevState,
-        [idx]: imageUrl,
-      }));
-    } catch (error) {
-      console.error("Error fetching image:", error);
-    }
-  };
 
   const [start, setStart] = useState(false);
 
@@ -144,9 +117,7 @@ const Reviews = ({
   );
 
   return (
-    <div
-      className="relative bg-[#ffffff] z-20 w-full overflow-hidden py-16"
-    >
+    <div className="relative bg-[#ffffff] z-20 w-full overflow-hidden py-16">
       {/* Static reviews section */}
       <motion.div
         ref={ref}
@@ -202,7 +173,7 @@ const Reviews = ({
                       <div className="w-2/5 h-full flex justify-center items-center hidden md:block">
                         <div className="absolute top-0 bottom-0 right-0 w-0 md:group-hover:w-64 transition-all duration-300 ease-in-out overflow-hidden">
                           <img
-                            src={imageURLs[idx] || ""}
+                            src={item.picture}
                             alt="Thumbnail"
                             className="h-full w-md rounded-lg object-cover"
                           />
@@ -218,7 +189,7 @@ const Reviews = ({
                         <p className="text-lg mb-4">{selectedReview.quote}</p>
                         <div className="flex justify-center">
                           <img
-                            src={imageURLs[idx] || ""}
+                            src={selectedReview.picture}
                             alt="Full size"
                             className="border-2 border-white rounded-lg"
                           />

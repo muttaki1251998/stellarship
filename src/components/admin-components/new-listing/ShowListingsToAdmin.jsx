@@ -6,7 +6,6 @@ import axios from "axios";
 
 const ShowListingsToAdmin = ({ listings }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState({});
-  const [imageURLs, setImageURLs] = useState({});
   const [editingListing, setEditingListing] = useState(null);
   const dispatch = useDispatch();
 
@@ -19,39 +18,13 @@ const ShowListingsToAdmin = ({ listings }) => {
       {}
     );
     setCurrentImageIndex(initialImageIndex);
-
-    // Fetch images
-    listings.forEach((listing, index) => {
-      if (listing.listingImages && listing.listingImages.length > 0) {
-        fetchImage(listing.listingImages[0], index);
-      }
-    });
   }, [listings]);
-
-  const fetchImage = async (imagePath, index) => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/images/${imagePath}`, {
-        headers: {
-          "x-frontend-id": "orionship",
-        },
-        responseType: 'blob',
-      });
-      const imageUrlObject = URL.createObjectURL(response.data);
-      setImageURLs((prevState) => ({
-        ...prevState,
-        [index]: imageUrlObject,
-      }));
-    } catch (error) {
-      console.error("Error fetching image:", error);
-    }
-  };
 
   const handleNextImage = (index) => {
     setCurrentImageIndex((prevState) => ({
       ...prevState,
       [index]: (prevState[index] + 1) % listings[index].listingImages.length,
     }));
-    fetchImage(listings[index].listingImages[(currentImageIndex[index] + 1) % listings[index].listingImages.length], index);
   };
 
   const handlePrevImage = (index) => {
@@ -61,21 +34,19 @@ const ShowListingsToAdmin = ({ listings }) => {
         (prevState[index] - 1 + listings[index].listingImages.length) %
         listings[index].listingImages.length,
     }));
-    fetchImage(listings[index].listingImages[(currentImageIndex[index] - 1 + listings[index].listingImages.length) % listings[index].listingImages.length], index);
   };
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(
+      const response = await axios.delete(
         `${process.env.NEXT_BACKEND_API_URL}/delete-listing/${id}`,
         {
-          method: "DELETE",
           headers: {
             "x-frontend-id": "orionship",
           },
         }
       );
-      if (response.ok) {
+      if (response.status === 200) {
         dispatch(fetchListings());
       }
     } catch (error) {
@@ -108,7 +79,7 @@ const ShowListingsToAdmin = ({ listings }) => {
             {listing.listingImages && listing.listingImages.length > 0 ? (
               <>
                 <img
-                  src={imageURLs[index] || ''}
+                  src={listing.listingImages[currentImageIndex[index]]}
                   alt={`Listing Image ${index + 1}`}
                   className="w-full h-auto rounded-md mb-4"
                 />

@@ -5,7 +5,7 @@ const nextConfig = {
     NEXT_BACKEND_URL: process.env.NEXT_BACKEND_URL,
   },
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'muttakibucket.s3.us-east-1.amazonaws.com'],
   },
 };
 
