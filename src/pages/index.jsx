@@ -151,8 +151,8 @@ const Home = ({ initialData }) => {
               <Image
                 src={profilePicture}
                 alt="Profile Picture"
-                width={300}
-                height={300}
+                width={isMobile ? 200 : 300}
+                height={isMobile ? 200 : 300}
                 className="border text-white border-gray-300 p-4 bg-white rounded-none"
               />
               <h3 className="text-center h-full text-2xl  font-caveat bg-white text-black text-xl p-4">{`${firstName} ${lastName}`}</h3>
